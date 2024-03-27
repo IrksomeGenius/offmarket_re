@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  db:
+    build: ./db
+    env_file:
+      - ./variables.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  etl:
+    build: ./etl
+    volumes: ## local volumes for dev ##
+      - ./data/raw:/data/raw
+      - ./data/transformed:/data/transformed
+    depends_on:
+      - db
+
+  vis:
+    build: ./vis
+    volumes:
+      - ./data/transformed:/data/transformed
+    ports:
+      - "8080:8080" #web app
+    depends_on:
+      - db
+      - etl
+
+volumes:
+  postgres-data:

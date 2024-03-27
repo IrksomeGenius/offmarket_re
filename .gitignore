@@ -1,0 +1,16 @@
+# General
+.DS_Store ##
+__pycache__/
+*.pyc
+
+# VSCode specific
+.vscode/
+
+# Log files
+*.log
+
+# Data directory
+data/
+
+# Environment variables
+variables.env
