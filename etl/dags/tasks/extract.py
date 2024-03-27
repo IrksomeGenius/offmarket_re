@@ -1,17 +1,32 @@
 import requests
-import pandas as pd
+import os
+import gzip
+import shutil
 
-def extract(extract_type, call, save_path):
+def extract(url, save_path):
     """
-    Extracts data from a URL or an API endpoint and saves it as CSV.
+    Downloads data from a specified URL and saves it to a given path.
+
+    :param url: The URL to download the data from.
+    :param save_path: The local file path to save the downloaded data.
     """
-    if extract_type == 'url':
-        df = pd.read_csv(call)
-        df.to_csv(save_path, index=False)
-    elif extract_type == 'api':
-        response = requests.get(call)
-        response.raise_for_status() # raise error for bad responses
-        df = pd.json_normalize(response.json())
-        df.to_csv(save_path, index=False)
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        tmp_gzip_path = save_path + '.gz'
+        
+        # Save gzip content to temp file
+        with open(tmp_gzip_path, 'wb') as tmp_gzip:
+            for chunk in response.iter_content(chunk_size=8192):
+                tmp_gzip.write(chunk)
+        
+        # Decompress gzip and save the content
+        with gzip.open(tmp_gzip_path, 'rb') as f_in:
+            with open(save_path, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+                
+        # Clean up the temporary GZip file
+        os.remove(tmp_gzip_path)
+        
+        print(f"Data successfully downloaded and decompressed to {save_path}")
     else:
-        raise ValueError("Invalid extract_type. Must be 'url' or 'api'.")
+        print(f"Failed to download data. Status code: {response.status_code}")
