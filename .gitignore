@@ -3,14 +3,12 @@
 __pycache__/
 *.pyc
 
-# VSCode specific
 .vscode/
-
-# Log files
 *.log
 
-# Data directory
+# Project specific
 data/
+etl/dags/tasks/.ipynb_checkpoints
 
 # Environment variables
 variables.env
